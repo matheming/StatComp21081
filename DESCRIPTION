@@ -1,0 +1,17 @@
+Package: StatComp21081
+Type: Package
+Title: What the Package Does in One 'Title Case' Line
+Version: 1.0
+Date: 2021-12-10
+Author: Jianming Wu
+Maintainer: Jianming Wu <matheming@mail.ustc.edu.cn>
+Description: One paragraph description of what the package does as one or more full sentences.
+License: GPL (>= 2)
+Imports: Rcpp, microbenchmark, stats, graphics, scales, boot, bootstrap, energy, Ball, RANN, stats4, parallel, quadprog
+LinkingTo: Rcpp
+Encoding: UTF-8
+RoxygenNote: 7.1.2
+Suggests: knitr, rmarkdown
+VignetteBuilder: knitr
+URL: http://github.com/matheming/StatComp
+BugReports: http://github.com/matheming/StatComp/issues
