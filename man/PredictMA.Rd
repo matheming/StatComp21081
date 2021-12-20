@@ -22,15 +22,15 @@ Predicting with new data
 }
 \examples{
 \dontrun{
-## simulation data
-n <- 10
+n <- 15
 p <-3
-X <- data.frame(matrix(rnorm(n*p), n, p))
+X <- matrix(rnorm(n*p), n, p)
 beta <- c(1, 2, 3)
-y <- X \%*\% beta
-Data <- cbind(y, X)
-subset <- matrix(c(1,0,0,0,1,0),ncol=p)
-get_MA<-MA(y~., Data, method="MMA", Subset = subset)
-PredictMA(data.frame(matrix(rnorm(5*p),ncol=p)),get_MA)
+y <- X \%*\% beta+rnorm(n)
+y<-data.frame(y)
+Data <- cbind(y, data.frame(X))
+subset <- matrix(c(1,0,0,0,1,0),ncol=p,byrow = TRUE)
+get_MA_nest<-ModelAve(y~., Data[1:10,], method = "MMA", nested = TRUE)
+PredictMA(Data[11:15,],get_MA_nest,ynew = TRUE)
 }
 }

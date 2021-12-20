@@ -3,7 +3,6 @@
 export()
 export(ModelAve)
 export(PredictMA)
-export(ff2n)
 export(ff2nC)
 import(stats)
 importFrom(quadprog,solve.QP)

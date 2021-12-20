@@ -1,4 +1,4 @@
-#' @title A model averaging function
+#' @title A linear model averaging function
 #' @name ModelAve
 #' @description Model averaging function including MMA and JMA
 #' @param Formula formula like `y~.` or `y~X1+X2` which mean whole model
@@ -10,21 +10,22 @@
 #' @return The optimal weight, the coefficients of all models
 #' @examples 
 #' \dontrun{
-#' ## simulation data
-#' n <- 10
+#' n <- 15
 #' p <-3
-#' X <- data.frame(matrix(rnorm(n*p), n, p))
+#' X <- matrix(rnorm(n*p), n, p)
 #' beta <- c(1, 2, 3)
-#' y <- X %*% beta
-#' Data <- cbind(y, X)
-#' subset <- matrix(c(1,0,0,0,1,0),ncol=p)
-#' MA(y~., Data, method="MMA", Subset = subset)
+#' y <- X %*% beta+rnorm(n)
+#' y<-data.frame(y)
+#' Data <- cbind(y, data.frame(X))
+#' subset <- matrix(c(1,0,0,0,1,0),ncol=p,byrow = TRUE)
+#' ModelAve(y~., Data[1:10,], method="MMA", Subset = subset)
+#' ModelAve(y~., Data[1:10,], method = "MMA", nested = TRUE)
 #' }
 #' @import stats 
 #' @importFrom quadprog solve.QP
 #' @useDynLib StatComp21081
 #' @export
-ModelAve<-function(Formula, Data, nested=FALSE, method, Subset=NULL, equalweight=FALSE){
+ModelAve<-function(Formula, Data, method, nested=FALSE, Subset=NULL, equalweight=FALSE){
   
   Data<-data.frame(Data)
   ## change order
@@ -62,8 +63,18 @@ ModelAve<-function(Formula, Data, nested=FALSE, method, Subset=NULL, equalweight
   if(nested==TRUE){
     Index<-matrix(1,p,p)
     Index[!lower.tri(Index,diag = TRUE)]<-0
+    
+    Cors<-abs(cor(Data$y,Data[,-1]))
+    Sorts<-sort(Cors,decreasing = TRUE,index.return=TRUE)
+    X1_1<-Data[,Sorts$ix+1]
+    Data[,2:ncol(Data)]<-X1_1
+    colnames(Data)[2:ncol(Data)]<-colnames(X1_1)
+    remove(X1_1)
   }
   n_index<-nrow(Index)
+  
+  name_alldata<-colnames(Data)
+  Model<-as.formula(paste(paste(name_alldata[1],"~"),paste(name_alldata[-1],collapse = "+")))
   
   bsingles<-matrix(NA,n,n_index)
   bfsingles<-matrix(NA,n,n_index)
@@ -115,8 +126,9 @@ ModelAve<-function(Formula, Data, nested=FALSE, method, Subset=NULL, equalweight
   yhat <- cbind(c(1,n),Data2) %*% betahat
   ehat <- y-yhat
   r2 <- sum((yhat-ybar)^2)/sum((y-ybar)^2)
+  
   if (method == "MMA") cn=(t(w) %*% a1 %*% w - 2*t(a2) %*% w)/n
   if (method == "JMA") cn=(t(w) %*% a1 %*% w)/n
   
-  return(list(betahat=betahat,w=w,yhat=yhat,ehat=ehat,r2=r2,cn=cn))
+  return(list(betahat=betahat,w=w,yhat=yhat,ehat=ehat,r2=r2,cn=cn,model=Model))
 }
